@@ -18,6 +18,10 @@ This record is based on the learning conversation and submitted code. Expected o
 | Grouping by account and event type | Submitted `events_df.groupBy("account_id", "event_type").count()` |
 | Column renaming | Submitted `withColumnRenamed("count", "event_count")` |
 | Filtering aggregated results | Submitted account aggregation followed by `filter("event_count > 2")`; logic correct, but required output name was `total_events` |
+| Scoped null replacement | Submitted `acc_activity.fillna(0, subset="total_events")`; correct for the complete synthetic fixture |
+| Zero-activity filtering | Submitted filter on `total_events == 0`; renamed result to `zero_activity_account` |
+| Timestamp parsing | Submitted `F.to_timestamp(F.col("event_ts"))` inside `withColumn`, plus schema/display calls |
+| Notebook setup | Placed functions import and UTC session configuration before timestamp work |
 | Join selection | Selected and implemented a left join using unfiltered account totals; code reviewed on 2026-10-16, displayed output not shared |
 
 Lazy evaluation, transformations versus actions, and aggregation grain were introduced. Independent mastery of execution planning has not yet been demonstrated.
@@ -35,7 +39,7 @@ Expected results:
 - Counts by account and event type: a1/search = 1, a1/reveal = 1, a1/export = 1, a2/search = 2.
 - Accounts with more than two total events: a1 = 3.
 
-The current sample has no users or timestamps and is not yet a complete source contract.
+The original sample has no timestamps. A separate five-row `timed_events` fixture now adds UTC event timestamps on October 14–15. User identifiers and a complete source contract are still pending.
 
 ## Decisions and lessons
 
@@ -51,7 +55,7 @@ The current sample has no users or timestamps and is not yet a complete source c
 
 ## Left join exercise
 
-**Status: implementation submitted and reviewed on 2026-10-16. Output confirmation and null interpretation pending.**
+**Status: implementation submitted and reviewed on 2026-10-16. Null interpretation discussed; output has not been independently observed.**
 
 Create this synthetic accounts dataset:
 
@@ -81,13 +85,41 @@ Acceptance criteria:
 - Explain why a3 has null rather than a measured zero.
 - Discuss the completeness assumptions needed before converting null to zero.
 
-## Next task — interpret nulls
+## Session checkpoint — 2026-10-16
 
-Confirm the displayed output matches the table above. Explain what a3's null tells us, and whether it alone proves there was no activity. Then discuss data completeness before replacing null with zero.
+Submitted code for scoped null replacement, zero-activity filtering, and timestamp parsing was reviewed as correct. Runtime outputs were not pasted or independently inspected.
+
+Expected results:
+- Filled account counts: a1 = 3, a2 = 2, a3 = 0.
+- Zero-activity filter: only a3/Cedar, with total_events = 0.
+- parsed_events_df: five rows; event_ts changes from string to timestamp, with no null timestamps for the supplied fixture.
+- timed_events_df retains its string column; the original events_df is unchanged.
+
+Architecture discussion:
+- A truncate-first full refresh that fails before insertion leaves an empty events target. A left join from preserved accounts then produces null counts; filling those nulls would falsely report zero activity.
+- A failed refresh must not publish an empty or partial dataset as a valid reporting period.
+- Interpret unmatched counts as zero only after establishing completeness for the relevant reporting period. A higher reporting layer still needs that evidence.
+- Event time, Kafka record timestamp, and ingestion time are distinct. event_ts models application event time; Kafka ingestion has not been implemented.
+- The duplicate-account example was hypothetical. The actual accounts fixture has one row each for a1, a2, and a3. No duplicate defect was found or introduced.
+- Join multiplication was explained, but an independent duplicate-detection exercise has not been completed.
+
+## Next task — date extraction
+
+**Status: assigned, not yet submitted.**
+
+Add `event_date` to `parsed_events_df` using `withColumn`, `F.to_date`, and `F.col`. Assign the result to `daily_events_df` and display it.
+
+Acceptance criteria:
+- Five rows remain.
+- Preserve `event_ts` as timestamp.
+- `event_date` has date type and no nulls for this fixture.
+- UTC calendar dates: three events on 2026-10-14 and two on 2026-10-15.
+
+After review, proceed to daily per-account aggregation. Do not mark date extraction complete or add its solution yet.
 
 ## Not yet completed
 
-- Full source contract and event-time semantics.
+- Full source contract, late-arrival behavior, and reporting-window semantics (event-time basics introduced).
 - Formal Python/testing proficiency assessment beyond the submitted exercises.
 - Delta table persistence, file ingestion, or any production pipeline.
 - Scheduled jobs, automated tests, CI/CD, access controls, monitoring, or recovery.
