@@ -7,6 +7,13 @@
 
 # COMMAND ----------
 
+from pyspark.sql import functions as F
+
+# Explicit UTC session assumption for timestamp display and date extraction.
+spark.conf.set("spark.sql.session.timeZone", "UTC")
+
+# COMMAND ----------
+
 project_name = "Account Pulse"
 print(f"{project_name} is ready")
 
@@ -99,7 +106,63 @@ display(acc_activity)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Next task
-# MAGIC Confirm expected counts: a1 = 3, a2 = 2, a3 = null.
-# MAGIC Explain what a3's null means and what completeness checks are needed
-# MAGIC before interpreting it as zero activity.
+# MAGIC ## Null handling and zero activity
+# MAGIC This synthetic fixture is assumed complete. In production, validate
+# MAGIC reporting-period completeness before interpreting missing matches as zero.
+
+# COMMAND ----------
+
+acc_activity_complete = acc_activity.fillna(0, subset="total_events")
+display(acc_activity_complete)
+
+# COMMAND ----------
+
+zero_activity_account = acc_activity_complete.filter(
+    acc_activity_complete.total_events == 0
+)
+display(zero_activity_account)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Timestamp parsing — submitted 2026-10-16
+# MAGIC event_ts models when the application action happened.
+# MAGIC These records are synthetic payloads, not records ingested from Kafka.
+# MAGIC Keep the original events dataset unchanged.
+
+# COMMAND ----------
+
+timed_events = [
+    {"event_id": "e1", "account_id": "a1", "event_type": "search",
+     "event_ts": "2026-10-14T09:00:00Z"},
+    {"event_id": "e2", "account_id": "a1", "event_type": "reveal",
+     "event_ts": "2026-10-14T09:05:00Z"},
+    {"event_id": "e3", "account_id": "a2", "event_type": "search",
+     "event_ts": "2026-10-14T10:00:00Z"},
+    {"event_id": "e4", "account_id": "a1", "event_type": "export",
+     "event_ts": "2026-10-15T11:00:00Z"},
+    {"event_id": "e5", "account_id": "a2", "event_type": "search",
+     "event_ts": "2026-10-15T12:00:00Z"},
+]
+
+timed_events_df = spark.createDataFrame(timed_events)
+timed_events_df.printSchema()
+
+# COMMAND ----------
+
+parsed_events_df = timed_events_df.withColumn(
+    "event_ts",
+    F.to_timestamp(F.col("event_ts"))
+)
+parsed_events_df.printSchema()
+display(parsed_events_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Next task — date extraction (pending)
+# MAGIC Add event_date to parsed_events_df using withColumn, F.to_date, and F.col.
+# MAGIC Assign the result to daily_events_df and preserve event_ts.
+# MAGIC Acceptance: five rows, event_ts remains timestamp, event_date is date,
+# MAGIC no null dates for this fixture, three events on 2026-10-14 and two on 2026-10-15.
+# MAGIC No solution is included until the exercise is submitted.
