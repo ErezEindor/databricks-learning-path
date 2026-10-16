@@ -25,7 +25,9 @@ Learning priorities:
 
 Foundational exercises have been reviewed: Python counts, Spark DataFrame creation, filtering, aggregation, column renaming, and filtering aggregated results.
 
-**Next:** aggregate all events by account and left join to an accounts dataset, preserving accounts with no events. The join type was correctly identified; implementation is pending.
+The left join using unfiltered account totals was submitted and reviewed on 2026-10-16. Displayed output has not yet been shared.
+
+**Next:** confirm the joined output and interpret missing matches before replacing null with zero.
 
 See [PROGRESS.md](PROGRESS.md) for evidence, expected results, and the next task.
 
