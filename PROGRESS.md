@@ -1,7 +1,7 @@
 # Account Pulse — Progress
 
 Documentation checkpoint: **2026-10-16**  
-Learning sessions represented: **2026-10-10**, Israel local time.
+Learning sessions represented: **2026-10-10 and 2026-10-16**, Israel local time.
 
 This record is based on the learning conversation and submitted code. Expected outputs below are derived from the five-event sample; they are not independently captured Databricks execution results.
 
@@ -18,7 +18,7 @@ This record is based on the learning conversation and submitted code. Expected o
 | Grouping by account and event type | Submitted `events_df.groupBy("account_id", "event_type").count()` |
 | Column renaming | Submitted `withColumnRenamed("count", "event_count")` |
 | Filtering aggregated results | Submitted account aggregation followed by `filter("event_count > 2")`; logic correct, but required output name was `total_events` |
-| Join selection | Correctly selected a left join to retain accounts without events; implementation not yet submitted |
+| Join selection | Selected and implemented a left join using unfiltered account totals; code reviewed on 2026-10-16, displayed output not shared |
 
 Lazy evaluation, transformations versus actions, and aggregation grain were introduced. Independent mastery of execution planning has not yet been demonstrated.
 
@@ -49,9 +49,9 @@ The current sample has no users or timestamps and is not yet a complete source c
 - Output column names are part of the consumer-facing data contract.
 - Spark transformations return new DataFrames; grouping changes the result grain.
 
-## Next exercise — left join
+## Left join exercise
 
-**Status: pending implementation.**
+**Status: implementation submitted and reviewed on 2026-10-16. Output confirmation and null interpretation pending.**
 
 Create this synthetic accounts dataset:
 
@@ -81,7 +81,9 @@ Acceptance criteria:
 - Explain why a3 has null rather than a measured zero.
 - Discuss the completeness assumptions needed before converting null to zero.
 
-The follow-up is to examine missing matches and data completeness, then handle nulls deliberately.
+## Next task — interpret nulls
+
+Confirm the displayed output matches the table above. Explain what a3's null tells us, and whether it alone proves there was no activity. Then discuss data completeness before replacing null with zero.
 
 ## Not yet completed
 
