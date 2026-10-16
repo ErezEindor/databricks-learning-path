@@ -23,11 +23,11 @@ Learning priorities:
 
 ## Current status
 
-Foundational exercises have been reviewed: Python counts, Spark DataFrame creation, filtering, aggregation, column renaming, and filtering aggregated results.
+Reviewed exercises now cover Python counts, Spark DataFrame creation, filtering, aggregation, renaming, filtering aggregated results, left joins, scoped null replacement, zero-activity filtering, and UTC timestamp parsing.
 
-The left join using unfiltered account totals was submitted and reviewed on 2026-10-16. Displayed output has not yet been shared.
+Latest checkpoint: **2026-10-16**. Submitted code has been reviewed; displayed outputs have not been independently observed. We also documented the danger of interpreting a failed truncate-first refresh as zero activity.
 
-**Next:** confirm the joined output and interpret missing matches before replacing null with zero.
+**Next:** add an `event_date` column to `parsed_events_df` while preserving `event_ts`. Date extraction is assigned but not yet submitted.
 
 See [PROGRESS.md](PROGRESS.md) for evidence, expected results, and the next task.
 
