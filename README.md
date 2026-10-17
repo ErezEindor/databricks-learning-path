@@ -1,82 +1,183 @@
-# Databricks Learning Path — Account Pulse
+# Databricks Learning Path
 
-A project-based learning journey by Erez Ein-Dor: build an account-engagement monitoring platform for a fictional B2B prospecting product using synthetic data.
+**Learn Databricks by building a data product, one engineering skill at a time.**
 
-## Goal
+This repository is an evolving, project-based curriculum for anyone who wants to move from basic Python and SQL to reliable data engineering on Databricks. The running project, **Account Pulse**, turns synthetic product events into daily account-engagement metrics and, eventually, an explainable engagement monitoring platform.
 
-Turn searches, contact reveals, and exports into trustworthy account-level engagement metrics. Identify sustained changes and explain the evidence without treating lower activity as proof of churn.
+**Current release:** an introductory notebook covering PySpark transformations through daily account-date joins. The broader curriculum below is a roadmap, not a claim that all lessons are already available.
 
-Learning priorities:
-- Reliable data pipelines with PySpark and Delta.
-- Platform architecture and governance.
-- Testing, deployment, monitoring, and recovery.
-- Trustworthy data foundations for a later AI use case.
+## Table of contents
 
-## Starting point and constraints
+- [Who this is for](#who-this-is-for)
+- [What you will build](#what-you-will-build)
+- [Prerequisites](#prerequisites)
+- [Start here — Windows and macOS](#start-here--windows-and-macos)
+- [Available materials](#available-materials)
+- [Curriculum and learning path](#curriculum-and-learning-path)
+- [How to study](#how-to-study)
+- [Milestones and assessment](#milestones-and-assessment)
+- [Environment and cost](#environment-and-cost)
+- [Project design principles](#project-design-principles)
+- [Official references](#official-references)
+- [Contributing](#contributing)
+- [Maintainer workspace](#maintainer-workspace)
 
-- Data engineering and SQL experience, plus experience designing a migration architecture.
-- Learning hands-on Databricks and PySpark fundamentals.
-- Comfortable with Git branches and pull requests.
-- Personal Windows laptop; browser-based Databricks notebook setup completed.
-- 2–3 learning hours per week; maximum budget of $20/month, with free options preferred.
-- Planned learning environment: Databricks Free Edition. Exact account edition has not been independently verified.
+## Who this is for
 
-## Current status
+- Data engineers learning Databricks or moving from a warehouse-oriented stack.
+- SQL practitioners learning PySpark and distributed processing.
+- Learners who want to connect architecture choices to working code, failure recovery, and operational behavior.
 
-Reviewed exercises now cover Python counts, Spark DataFrame creation, filtering, aggregation, renaming, left joins, scoped null replacement, zero-activity filtering, UTC timestamp parsing, date extraction, daily aggregation, an independent reporting calendar, and an account-date cross join followed by a two-key left join.
+No prior Databricks experience is required. This is not yet a complete beginner Python course or a certification-preparation course.
 
-Latest checkpoint: **2026-10-17**. Submitted code has been reviewed; displayed outputs have not been independently observed. The daily join is expected to preserve six account-date rows, including null counts for Cedar on both reporting dates.
+## What you will build
 
-**Next:** replace nulls only in `daily_events` under the complete-synthetic-data assumption, sort by account and date, and assign `daily_account_report`. This final daily-report step is pending.
+Account Pulse models a fictional B2B prospecting product where users search for prospects, reveal contact details, and export results.
 
-See [PROGRESS.md](PROGRESS.md) for evidence, expected results, and the next task.
+The central question is:
 
-## Live Databricks notebook
+> Which accounts show sustained declining engagement, what changed, and can we trust the supporting data?
 
-[Open the Account Pulse learning notebook in Databricks](https://dbc-d59ea919-4a47.cloud.databricks.com/editor/notebooks/273428319476598?o=1380376101535698)
+The first deliverable is a daily account activity report, including accounts with no activity. Later milestones add file ingestion, Delta tables, incremental processing, quality checks, historical comparisons, deployment, and observability. An optional AI extension will summarize verified account metrics.
 
-Requires sign-in and permission to access the Databricks workspace and notebook. This link does not grant access or automatically synchronize the notebook with this repository. The live notebook's contents have not been independently inspected by the assistant.
+All data is synthetic. The current fixture has three accounts, five events, and two reporting dates. User-level activity, realistic history, and production-style ingestion are planned extensions.
 
-## Repository contents
+## Prerequisites
 
-| File | Purpose |
+| Skill or resource | Needed at the start |
 |---|---|
-| [00_getting_started.py](00_getting_started.py) | Databricks source notebook reconstructed from the exercises submitted in conversation |
-| [PROGRESS.md](PROGRESS.md) | Learning checkpoint, reviewed work, decisions, and next exercise |
+| Python | Variables, lists, dictionaries, conditions, and basic function calls |
+| SQL | SELECT, WHERE, GROUP BY, and basic joins |
+| Databricks account | Your own workspace with notebook execution access |
+| Computer | Windows or macOS with a current browser and internet access |
+| Git | Optional for the first notebook; useful for saving exercises and later collaboration |
 
-The notebook is a reconstruction, not an export of the live workspace. Variable names and formatting are normalized, including the requested `total_events` output name. It has not been executed by the assistant in Databricks.
+If Python or SQL is new to you, practice those basics first. The notebook includes a small Python counting exercise to check readiness.
 
-## Roadmap
+## Start here — Windows and macOS
 
-Estimates assume 2–3 hours per week and are adjustable; progression depends on demonstrated understanding.
+The introductory path runs **inside a Databricks browser notebook**. Spark compute runs remotely; no local Spark, Java, Docker, Python installation, or terminal is required for these exercises.
 
-| Stage | Deliverable and learning focus | Estimate | Status |
+| Task | Windows | macOS |
+|---|---|---|
+| Access Databricks | Browser | Browser |
+| Download the source notebook | Save the raw .py file | Save the raw .py file |
+| Run exercises | Import into your Databricks workspace | Import into your Databricks workspace |
+| Optional local repository work | Git in PowerShell or Git Bash | Git in Terminal |
+| Local Spark execution | Not configured by this repository | Not configured by this repository |
+
+1. Create or use a personal learning workspace. [Databricks Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition) is a starting option; review its limits before selecting an environment.
+2. Download [00_getting_started.py](00_getting_started.py) using GitHub's raw-file download. Preserve the `.py` extension and the first line, `# Databricks notebook source`.
+3. In Databricks, open **Workspace**, choose a destination folder, and use **Import** to upload the file as a notebook. See the [official import instructions](https://docs.databricks.com/aws/en/notebooks/notebook-export-import) if your interface differs.
+4. Open the imported notebook and select available compute; Free Edition uses serverless compute.
+5. Run the setup cell first, then work through the notebook in order. The setup imports PySpark functions and sets the session timezone to UTC.
+6. Compare results with the [checkpoint criteria](PROGRESS.md#foundation-checkpoints). Predict each result before running a worked example.
+7. Complete the final exercise without copying a solution.
+
+Optional, after installing Git, the following commands work in Windows PowerShell, Git Bash, and macOS Terminal:
+
+```sh
+git clone https://github.com/ErezEindor/databricks-learning-path.git
+cd databricks-learning-path
+```
+
+Cloning is not required for the browser path. Do not run the notebook with plain `python 00_getting_started.py`: it expects Databricks-provided `spark` and `display`. Importing a file does not establish automatic Git synchronization.
+
+## Available materials
+
+| Material | What is available now |
+|---|---|
+| [00_getting_started.py](00_getting_started.py) | Worked examples for Python counts, DataFrames, filtering, grouping, renaming, joins, null handling, timestamps, dates, and a daily reporting calendar |
+| [PROGRESS.md](PROGRESS.md) | Curriculum delivery status, expected results, reusable learner checklist, and next exercise |
+| This README | Setup, prerequisites, curriculum, milestones, and reference links |
+
+The source notebook was reconstructed from reviewed learning exercises. Its Python syntax was checked, but a clean-session Databricks execution has not been independently verified. Windows and macOS use the same browser workflow; separate local-runtime support has not been tested or packaged.
+
+## Curriculum and learning path
+
+Study the modules in order. Later modules build on earlier outputs. The delivery status refers to repository materials, not to any individual learner's progress.
+
+| Module | Topics to cover | Practical outcome | Material status |
 |---|---|---|---|
-| 1 | Setup, Python checkpoint, source contract, and table grains | 2 weeks | In progress: setup and initial exercises done; formal contract pending |
-| 2 | First end-to-end pipeline; PySpark and Delta foundations | 4–5 weeks | Foundational PySpark exercises started; pipeline pending |
-| 3 | Incremental ingestion, duplicates, schema changes, late events, safe reruns, backfills | 4–5 weeks | Planned |
-| 4 | Daily/weekly metrics, historical baselines, decline rules, quality checks | 3–4 weeks | Planned |
-| 5 | Orchestration, testing, deployment, monitoring, governance, recovery | 4–5 weeks | Planned |
-| 6 | Performance experiments and optional grounded AI account brief | 3–4 weeks | Planned |
+| 00 — Orientation | Workspace, compute versus storage, notebooks, Git basics, Python checkpoint | Import and run the learning notebook | Starter examples available; orientation guide partial |
+| 01 — PySpark foundations | Schemas, column expressions, filters, grouping, renaming, immutability, transformations and actions | Correct account-level metrics | Worked examples available; execution internals need expansion |
+| 02 — Joins and time | Grain, join keys, null versus zero, UTC timestamps, dates, independent calendars, cross joins | Daily report retaining zero-activity account-days | Examples through daily join available; final exercise pending |
+| 03 — Contracts and ingestion | Event schema, identifiers, event/ingestion time, explicit types, JSON/CSV files, malformed records | Validated file-based input and rejected-record handling | Planned |
+| 04 — Delta and layered design | Delta tables, transaction concepts, schema enforcement, history, raw/clean/reporting responsibilities | Persisted pipeline with justified layer boundaries | Planned |
+| 05 — Incremental reliability | Watermarks, deduplication, late events, MERGE, idempotency, schema evolution, safe refreshes and backfills | Repeatable processing that handles failure and reruns | Planned |
+| 06 — Engagement metrics | Windows, historical baselines, account eligibility, weekly activity, completeness, explainable business rules | Evidence-backed engagement signals | Planned |
+| 07 — Testing and orchestration | Data assertions, unit/integration tests, parameters, job dependencies, retries, logging, recovery | Scheduled, testable workflow | Planned |
+| 08 — Governance and delivery | Unity Catalog concepts, ownership, permissions, lineage, environments, code review, CI/CD | Documented access model and reproducible deployment | Planned |
+| 09 — Performance and operations | Query plans, shuffles, join strategies, skew, file layout, measurement, freshness and cost monitoring | Measured improvements and an operational runbook | Planned |
+| 10 — AI extension | Grounded summaries, evaluation examples, traceability, limitations and cost | Account brief based on validated metrics | Optional / planned |
 
-Testing, documentation, and governance will be introduced throughout. Enterprise administration and networking may require architecture exercises if unavailable in the learning environment. Completing one project is a foundation for mastery, not evidence of mastery by itself.
+Streaming and Kafka ingestion may become a later extension. The current event payloads are not connected to Kafka.
 
-## Working method
+## How to study
 
-1. Explain the concept and connect it to SQL or architecture.
-2. Assign one manageable exercise with acceptance criteria.
-3. Erez implements; hints precede full solutions unless requested.
-4. Review correctness, output schema, readability, and operational behavior.
-5. Introduce relevant failures and check understanding.
-6. Record demonstrated skills, unresolved gaps, and the next task.
+For each topic:
+1. Read the concept and predict the output.
+2. Implement a small exercise yourself.
+3. Inspect the schema, row grain, and result.
+4. Explain why the transformation is correct.
+5. Try an edge case or failure scenario.
+6. Record what you demonstrated and what remains unclear.
 
-Business thresholds will be explicit fictional stakeholder assumptions. Separate observed metrics, business interpretations, and data validity. Do not silently equate missing data with zero activity.
+The introductory notebook currently contains worked examples plus an unfinished exercise, rather than a separate exercise/solution package. Use the checklist in PROGRESS.md to attempt the completed examples independently.
 
-## Progress maintenance
+Suggested pace: 2–3 hours per week, split between concepts, implementation, and review. An initial end-to-end project may take several months; advanced material is still being developed. Passing a milestone matters more than meeting a calendar estimate.
 
-After each learning session:
-- Record the session date and reviewed code or observed output in `PROGRESS.md`.
-- Distinguish submitted code, user-confirmed execution, and independently verified output.
-- Update the notebook with completed exercises.
-- Keep unfinished work as tasks, rather than adding its solution as completed work.
-- Keep all datasets synthetic; do not commit credentials, personal customer data, or company material.
+## Milestones and assessment
+
+| Milestone | Evidence of completion |
+|---|---|
+| A — Daily activity report | Correct grain, six sample account-date rows, five total events, deliberate missing-data handling |
+| B — Persistent ingestion | Defined contract, file inputs, Delta outputs, rejected records with reasons |
+| C — Reliable processing | Reruns preserve correctness; late data and a failed refresh are handled explicitly |
+| D — Trustworthy engagement signals | Historical metrics and business rules distinguish low activity from incomplete data |
+| E — Operable platform | Tests, scheduled runs, deployment instructions, access model, and recovery procedure |
+| F — Optional AI brief | Claims trace back to metrics and are checked against evaluation examples |
+
+For every milestone, demonstrate that you can explain the design, implement it, verify the result, and diagnose a relevant failure. One project is a foundation for deeper expertise, not a guarantee of mastery.
+
+## Environment and cost
+
+Start small and use the free environment where suitable. Free Edition is quota-limited and serverless-only; some enterprise administration and compute capabilities are unavailable. Check the [current limitations](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations).
+
+Later modules must identify whether an exercise works in the free environment or needs a paid environment. Where a capability is unavailable, provide an architecture exercise or a clearly labeled alternative. Paid exercises are not required by the current notebook. A spending alert should not be treated as a guaranteed hard spending cap.
+
+## Project design principles
+
+- Define the grain and output schema before joining or aggregating.
+- Distinguish measured facts, business interpretation, and data validity.
+- Lower activity is not automatically lower value or churn.
+- Treat missing counts as zero only when the relevant reporting data is complete.
+- Define reporting dates independently of observed events.
+- Do not publish failed or partial refreshes as valid reporting periods.
+- Keep raw event time available when deriving dates and aggregates.
+- Add layers and infrastructure to solve demonstrated needs.
+- Measure performance before choosing an optimization.
+- Use synthetic data and keep credentials outside source control.
+
+## Official references
+
+Use these alongside the exercises; they are references, not claims of material already delivered here.
+
+- [Databricks Free Edition setup](https://docs.databricks.com/aws/en/getting-started/free-edition)
+- [Free Edition limitations](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations)
+- [Notebook import and export](https://docs.databricks.com/aws/en/notebooks/notebook-export-import)
+- [Apache Spark documentation](https://spark.apache.org/docs/latest/)
+- [Delta Lake documentation](https://docs.delta.io/latest/index.html)
+- [Databricks documentation](https://docs.databricks.com/)
+
+## Contributing
+
+Propose improvements through issues or pull requests. For new lessons, include objectives, prerequisites, a synthetic fixture, an exercise, expected results, and validation evidence. State any paid-feature requirements and document Windows/macOS differences when local commands are introduced.
+
+Keep available materials separate from planned topics. Do not mark a lesson runtime-validated based only on a syntax check. Avoid committing credentials, real customer data, or notebook outputs containing sensitive information.
+
+## Maintainer workspace
+
+[Maintainer's live Databricks notebook](https://dbc-d59ea919-4a47.cloud.databricks.com/editor/notebooks/273428319476598?o=1380376101535698)
+
+This is an optional maintainer reference, not a prerequisite. It requires existing workspace permission and is not a public execution environment. Learners should import the repository notebook into their own workspace.
