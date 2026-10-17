@@ -1,7 +1,7 @@
 # Account Pulse — Progress
 
-Documentation checkpoint: **2026-10-16**  
-Learning sessions represented: **2026-10-10 and 2026-10-16**, Israel local time.
+Documentation checkpoint: **2026-10-17**  
+Learning sessions represented: **2026-10-10, 2026-10-16, and 2026-10-17**, Israel local time.
 
 This record is based on the learning conversation and submitted code. Expected outputs below are derived from the five-event sample; they are not independently captured Databricks execution results.
 
@@ -22,6 +22,11 @@ This record is based on the learning conversation and submitted code. Expected o
 | Zero-activity filtering | Submitted filter on `total_events == 0`; renamed result to `zero_activity_account` |
 | Timestamp parsing | Submitted `F.to_timestamp(F.col("event_ts"))` inside `withColumn`, plus schema/display calls |
 | Notebook setup | Placed functions import and UTC session configuration before timestamp work |
+| Date extraction | Submitted `F.to_date(F.col("event_ts"))` into new event_date column; preserves timestamp |
+| Daily aggregation | Submitted grouping on account_id and event_date, with daily_events count |
+| Reporting calendar | Created two explicit dates independently of event data |
+| Account-date combinations | Submitted crossJoin; expected 3 accounts × 2 dates = 6 rows |
+| Daily left join | Submitted join on both account_id and event_date, retaining missing activity as null |
 | Join selection | Selected and implemented a left join using unfiltered account totals; code reviewed on 2026-10-16, displayed output not shared |
 
 Lazy evaluation, transformations versus actions, and aggregation grain were introduced. Independent mastery of execution planning has not yet been demonstrated.
@@ -103,19 +108,49 @@ Architecture discussion:
 - The duplicate-account example was hypothetical. The actual accounts fixture has one row each for a1, a2, and a3. No duplicate defect was found or introduced.
 - Join multiplication was explained, but an independent duplicate-detection exercise has not been completed.
 
-## Next task — date extraction
+## Session checkpoint — 2026-10-17
+
+Date extraction, daily aggregation, the independent reporting calendar, account-date cross join, and two-key left join were submitted and reviewed. Code is preserved in the reconstructed notebook, with formatting normalized and the user's variable names retained. Runtime output has not been shared or independently verified.
+
+Expected progression:
+- `daily_event_df`: five event rows, preserving event_ts and adding event_date.
+- `count_daily_event_df`: four observed account-date groups.
+- `account_dates_df`: six combinations (three accounts × two reporting dates).
+- `daily_acc_activity`: six rows after joining on both account_id and event_date.
+
+Expected daily join output, in any order:
+
+| account_id | account_name | event_date | daily_events |
+|---|---|---|---|
+| a1 | Atlas | 2026-10-14 | 2 |
+| a1 | Atlas | 2026-10-15 | 1 |
+| a2 | Beacon | 2026-10-14 | 1 |
+| a2 | Beacon | 2026-10-15 | 1 |
+| a3 | Cedar | 2026-10-14 | null |
+| a3 | Cedar | 2026-10-15 | null |
+
+Decisions and concepts:
+- UNION combines rows; CROSS JOIN generates every pair. The distinction was explained, then the cross join was implemented correctly.
+- Reporting dates are defined independently of received events, so a completely missing day can still appear.
+- All three accounts are assumed eligible for both dates in this fixture; real account eligibility is not yet modeled.
+- The daily count grain is one row per account and date. Both fields are needed for the join.
+- Null daily counts are intentionally preserved at this checkpoint.
+
+## Next task — finish the daily report
 
 **Status: assigned, not yet submitted.**
 
-Add `event_date` to `parsed_events_df` using `withColumn`, `F.to_date`, and `F.col`. Assign the result to `daily_events_df` and display it.
+Starting with `daily_acc_activity`, under the complete-synthetic-data assumption:
+1. Replace nulls only in `daily_events` with zero.
+2. Sort by `account_id`, then `event_date`.
+3. Assign the result to `daily_account_report` and display it.
 
 Acceptance criteria:
-- Five rows remain.
-- Preserve `event_ts` as timestamp.
-- `event_date` has date type and no nulls for this fixture.
-- UTC calendar dates: three events on 2026-10-14 and two on 2026-10-15.
-
-After review, proceed to daily per-account aggregation. Do not mark date extraction complete or add its solution yet.
+- Exactly six rows, one per account-date combination.
+- Cedar has zero events on both dates.
+- Daily counts sum to five.
+- Account and date sorting is explicit.
+- Original `daily_acc_activity` retains nulls.
 
 ## Not yet completed
 
