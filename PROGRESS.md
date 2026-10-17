@@ -1,127 +1,98 @@
-# Account Pulse — Progress
+# Curriculum Progress and Learner Checkpoints
 
-Documentation checkpoint: **2026-10-17**  
-Learning sessions represented: **2026-10-10, 2026-10-16, and 2026-10-17**, Israel local time.
+This document tracks **what the repository provides** and gives every learner a reusable assessment checklist. It is not a personal learning diary.
 
-This record is based on the learning conversation and submitted code. Expected outputs below are derived from the five-event sample; they are not independently captured Databricks execution results.
+Updated: **2026-10-17**. Start with the [README](README.md) for prerequisites, Windows/macOS setup, and the complete curriculum.
 
-## Completed or demonstrated
+## Table of contents
 
-| Topic | Evidence and status |
+- [Status definitions](#status-definitions)
+- [Curriculum delivery tracker](#curriculum-delivery-tracker)
+- [Foundation checkpoints](#foundation-checkpoints)
+- [Sample data and expected results](#sample-data-and-expected-results)
+- [Current open exercise](#current-open-exercise)
+- [Learning and architecture notes](#learning-and-architecture-notes)
+- [Validation status](#validation-status)
+- [Track your own progress](#track-your-own-progress)
+- [Maintainer backlog](#maintainer-backlog)
+- [Milestone history](#milestone-history)
+
+## Status definitions
+
+| Status | Meaning |
 |---|---|
-| Workspace setup | User shared workspace screenshots and confirmed creating the project folder/notebook |
-| Python execution | User confirmed completing the initial print exercise |
-| Python collection processing | Submitted `len(events)` and a generator expression counting search events; logic correct |
-| Spark basics | Submitted DataFrame counts, filter, and display calls |
-| Immutability | Correctly predicted that filtering into a new DataFrame leaves the original with five rows |
-| Grouping by account | Submitted `searches_df.groupBy("account_id").count()` |
-| Grouping by account and event type | Submitted `events_df.groupBy("account_id", "event_type").count()` |
-| Column renaming | Submitted `withColumnRenamed("count", "event_count")` |
-| Filtering aggregated results | Submitted account aggregation followed by `filter("event_count > 2")`; logic correct, but required output name was `total_events` |
-| Scoped null replacement | Submitted `acc_activity.fillna(0, subset="total_events")`; correct for the complete synthetic fixture |
-| Zero-activity filtering | Submitted filter on `total_events == 0`; renamed result to `zero_activity_account` |
-| Timestamp parsing | Submitted `F.to_timestamp(F.col("event_ts"))` inside `withColumn`, plus schema/display calls |
-| Notebook setup | Placed functions import and UTC session configuration before timestamp work |
-| Date extraction | Submitted `F.to_date(F.col("event_ts"))` into new event_date column; preserves timestamp |
-| Daily aggregation | Submitted grouping on account_id and event_date, with daily_events count |
-| Reporting calendar | Created two explicit dates independently of event data |
-| Account-date combinations | Submitted crossJoin; expected 3 accounts × 2 dates = 6 rows |
-| Daily left join | Submitted join on both account_id and event_date, retaining missing activity as null |
-| Join selection | Selected and implemented a left join using unfiltered account totals; code reviewed on 2026-10-16, displayed output not shared |
+| Available | Referenced worked examples exist in the repository; not automatically runtime-validated |
+| Partial | Some material exists, but the module's full objectives are not covered |
+| Open exercise | Requirements exist; a completed implementation is not yet included |
+| Planned | Curriculum intent only; no completed lesson is provided |
+| Runtime-validated | A reproducible run and its environment/results have been recorded |
 
-Lazy evaluation, transformations versus actions, and aggregation grain were introduced. Independent mastery of execution planning has not yet been demonstrated.
+## Curriculum delivery tracker
 
-## Sample and expected outputs
+Module numbers match the [README curriculum](README.md#curriculum-and-learning-path).
 
-Five synthetic events:
-- a1: one search, one reveal, one export.
-- a2: two searches.
-
-Expected results:
-- Total events: 5.
-- Search events: 3.
-- Search counts: a1 = 1, a2 = 2.
-- Counts by account and event type: a1/search = 1, a1/reveal = 1, a1/export = 1, a2/search = 2.
-- Accounts with more than two total events: a1 = 3.
-
-The original sample has no timestamps. A separate five-row `timed_events` fixture now adds UTC event timestamps on October 14–15. User identifiers and a complete source contract are still pending.
-
-## Decisions and lessons
-
-- Lower search volume can reflect greater efficiency; assess several signals before interpreting it.
-- Business stakeholders own risk definitions; engineering clarifies, challenges, implements, and validates them.
-- Sustained decline and an isolated unusual period must be distinguishable.
-- Preserve zero-activity accounts in reporting.
-- A Python list stores objects in one process; large datasets should be read directly by Spark rather than first collected into a huge Python list.
-- Traditional indexes were discussed conceptually; no indexing or storage-layout optimization has been implemented.
-- Optimize using actual queries and measured execution behavior.
-- Output column names are part of the consumer-facing data contract.
-- Spark transformations return new DataFrames; grouping changes the result grain.
-
-## Left join exercise
-
-**Status: implementation submitted and reviewed on 2026-10-16. Null interpretation discussed; output has not been independently observed.**
-
-Create this synthetic accounts dataset:
-
-| account_id | account_name |
-|---|---|
-| a1 | Atlas |
-| a2 | Beacon |
-| a3 | Cedar |
-
-Tasks:
-1. Create `accounts_df`.
-2. Aggregate all events in `events_df` by account into `account_totals`.
-3. Name the count column `total_events`.
-4. Left join accounts to those totals using `account_id`.
-5. Display the result; leave nulls unchanged for discussion.
-
-Acceptance criteria:
-
-| account_id | account_name | total_events |
+| Module | Delivery status | Current evidence or missing work |
 |---|---|---|
-| a1 | Atlas | 3 |
-| a2 | Beacon | 2 |
-| a3 | Cedar | null |
+| 00 — Orientation | Partial | Browser import guidance and setup cell exist; full platform orientation pending |
+| 01 — PySpark foundations | Partial | Counts, filtering, grouping, renaming available; schemas and execution internals need fuller lessons |
+| 02 — Joins and time | Partial | Left joins, scoped fill, timestamp/date parsing, calendar, cross join, and two-key join available; final daily report is open |
+| 03 — Contracts and ingestion | Planned | Formal event contract, file fixture, malformed-record exercise |
+| 04 — Delta and layered design | Planned | Persistent tables and layer-boundary exercises |
+| 05 — Incremental reliability | Planned | Reruns, duplicates, late data, merge, safe refreshes and backfills |
+| 06 — Engagement metrics | Planned | Historical dataset, windows, eligibility and business rules |
+| 07 — Testing and orchestration | Planned | Automated checks, scheduling, retries and recovery |
+| 08 — Governance and delivery | Planned | Catalog/access design, deployment and CI/CD |
+| 09 — Performance and operations | Planned | Plans, measured experiments, monitoring and runbook |
+| 10 — AI extension | Optional / planned | Grounded account summaries and evaluation |
 
-- Exactly three rows for this unique-account sample, one per account.
-- Do not reuse the totals filtered to more than two events; that would lose a2's count.
-- Explain why a3 has null rather than a measured zero.
-- Discuss the completeness assumptions needed before converting null to zero.
+## Foundation checkpoints
 
-## Session checkpoint — 2026-10-16
+All current worked examples are in [00_getting_started.py](00_getting_started.py), in the sequence below. Check items in your own fork or learning notes only after reproducing and explaining them.
 
-Submitted code for scoped null replacement, zero-activity filtering, and timestamp parsing was reviewed as correct. Runtime outputs were not pasted or independently inspected.
+- [ ] **Environment:** import the notebook, run the setup cell, explain where compute runs.
+- [ ] **Python counts:** count five events and three searches with Python.
+- [ ] **DataFrames:** create the sample DataFrame and inspect its schema.
+- [ ] **Filtering:** select searches without modifying the original DataFrame.
+- [ ] **Aggregation:** count searches by account and events by account/type.
+- [ ] **Schema clarity:** rename count columns to describe their meaning.
+- [ ] **Post-aggregation filtering:** keep accounts with more than two events.
+- [ ] **Account join:** retain all three accounts with a left join to unfiltered totals.
+- [ ] **Missing counts:** explain null versus zero and the completeness assumption.
+- [ ] **Scoped replacement:** fill only total_events, then select zero-activity accounts.
+- [ ] **Timestamps:** parse event_ts while preserving the original string DataFrame.
+- [ ] **Dates:** add event_date in the UTC session without removing event_ts.
+- [ ] **Daily aggregation:** produce one row per observed account/date.
+- [ ] **Reporting calendar:** build dates independently of incoming activity.
+- [ ] **Cross join:** construct all six account/date combinations.
+- [ ] **Two-key join:** attach daily counts using both account_id and event_date.
+- [ ] **Final report:** complete the open exercise below.
+- [ ] **Explanation:** distinguish transformations from actions and explain the grain at each stage.
 
-Expected results:
-- Filled account counts: a1 = 3, a2 = 2, a3 = 0.
-- Zero-activity filter: only a3/Cedar, with total_events = 0.
-- parsed_events_df: five rows; event_ts changes from string to timestamp, with no null timestamps for the supplied fixture.
-- timed_events_df retains its string column; the original events_df is unchanged.
+The unchecked boxes are a blank learner template; they do not mean the corresponding worked examples are missing.
 
-Architecture discussion:
-- A truncate-first full refresh that fails before insertion leaves an empty events target. A left join from preserved accounts then produces null counts; filling those nulls would falsely report zero activity.
-- A failed refresh must not publish an empty or partial dataset as a valid reporting period.
-- Interpret unmatched counts as zero only after establishing completeness for the relevant reporting period. A higher reporting layer still needs that evidence.
-- Event time, Kafka record timestamp, and ingestion time are distinct. event_ts models application event time; Kafka ingestion has not been implemented.
-- The duplicate-account example was hypothetical. The actual accounts fixture has one row each for a1, a2, and a3. No duplicate defect was found or introduced.
-- Join multiplication was explained, but an independent duplicate-detection exercise has not been completed.
+## Sample data and expected results
 
-## Session checkpoint — 2026-10-17
+The original events fixture contains five actions:
 
-Date extraction, daily aggregation, the independent reporting calendar, account-date cross join, and two-key left join were submitted and reviewed. Code is preserved in the reconstructed notebook, with formatting normalized and the user's variable names retained. Runtime output has not been shared or independently verified.
+| Account | Actions |
+|---|---|
+| a1 / Atlas | One search, one reveal, one export |
+| a2 / Beacon | Two searches |
+| a3 / Cedar | No events in the fixture |
 
-Expected progression:
-- `daily_event_df`: five event rows, preserving event_ts and adding event_date.
-- `count_daily_event_df`: four observed account-date groups.
-- `account_dates_df`: six combinations (three accounts × two reporting dates).
-- `daily_acc_activity`: six rows after joining on both account_id and event_date.
+Expected checks:
+- Total events: **5**; searches: **3**.
+- Search counts: a1 = **1**, a2 = **2**.
+- Account totals after the left join: a1 = **3**, a2 = **2**, a3 = **null**.
+- After justified account-level null replacement: a3 = **0**.
+- The more-than-two-events filter retains only a1.
 
-Expected daily join output, in any order:
+The separate timed fixture places three events on October 14 and two on October 15, 2026. It retains five event rows after timestamp parsing and date extraction.
+
+The daily left join should produce the following rows, in any order:
 
 | account_id | account_name | event_date | daily_events |
-|---|---|---|---|
+|---|---|---|---:|
 | a1 | Atlas | 2026-10-14 | 2 |
 | a1 | Atlas | 2026-10-15 | 1 |
 | a2 | Beacon | 2026-10-14 | 1 |
@@ -129,45 +100,99 @@ Expected daily join output, in any order:
 | a3 | Cedar | 2026-10-14 | null |
 | a3 | Cedar | 2026-10-15 | null |
 
-Decisions and concepts:
-- UNION combines rows; CROSS JOIN generates every pair. The distinction was explained, then the cross join was implemented correctly.
-- Reporting dates are defined independently of received events, so a completely missing day can still appear.
-- All three accounts are assumed eligible for both dates in this fixture; real account eligibility is not yet modeled.
-- The daily count grain is one row per account and date. Both fields are needed for the join.
-- Null daily counts are intentionally preserved at this checkpoint.
+These are expected results derived from the fixture, not captured execution logs.
 
-## Next task — finish the daily report
+## Current open exercise
 
-**Status: assigned, not yet submitted.**
+**Goal:** finish the daily account report.
 
-Starting with `daily_acc_activity`, under the complete-synthetic-data assumption:
+**Prerequisites:** complete the existing notebook through `daily_acc_activity`.
+
+**Assumptions:** the synthetic data is complete for both reporting dates, and all three accounts are eligible on both dates.
+
+Starting from `daily_acc_activity`:
 1. Replace nulls only in `daily_events` with zero.
 2. Sort by `account_id`, then `event_date`.
 3. Assign the result to `daily_account_report` and display it.
 
+Hints: use `fillna` and `orderBy`. The solution is intentionally not included yet.
+
 Acceptance criteria:
-- Exactly six rows, one per account-date combination.
-- Cedar has zero events on both dates.
-- Daily counts sum to five.
-- Account and date sorting is explicit.
-- Original `daily_acc_activity` retains nulls.
+- Exactly **six rows**, unique by account_id and event_date.
+- Cedar has **zero** events on both dates.
+- daily_events sums to **five**.
+- Rows are explicitly sorted by account and date.
+- The original daily_acc_activity still represents the unfilled result.
 
-## Not yet completed
+Reflection: why would applying the same null replacement to an incomplete reporting period be misleading?
 
-- Full source contract, late-arrival behavior, and reporting-window semantics (event-time basics introduced).
-- Formal Python/testing proficiency assessment beyond the submitted exercises.
-- Delta table persistence, file ingestion, or any production pipeline.
-- Scheduled jobs, automated tests, CI/CD, access controls, monitoring, or recovery.
-- Performance measurements, large-scale processing, or AI functionality.
-- Synchronization of the live Databricks notebook with this repository.
+## Learning and architecture notes
 
-## Session checkpoint template
+- **Grain:** event-level input, account-level totals, and account-date totals are different datasets with different join keys.
+- **Missing data:** a null from a left join means no matching row; it alone does not prove zero real-world activity.
+- **Failure behavior:** a truncate-first refresh can leave an empty target if it fails before insertion. Reporting must not present that failure as universal inactivity.
+- **Join cardinality:** duplicate keys can repeat aggregate values. The supplied accounts fixture is unique; duplicate-account examples are hypothetical, not defects discovered in it.
+- **Calendar design:** a date with no received events must still be representable in the reporting calendar.
+- **Eligibility:** pairing all accounts with all dates is appropriate only under the exercise assumption. Account activation/deactivation windows are a later extension.
+- **Time:** application event time, Kafka record timestamp, and ingestion time are distinct. The fixture models event time without implementing Kafka.
+- **Business meaning:** lower search activity may reflect efficiency; sustained engagement rules require stakeholder definitions and trustworthy inputs.
+- **Performance:** a Python list on one process is not a scalable ingestion design. Distributed execution and optimization must be studied with actual workloads.
 
-For future updates, record:
-- Date:
-- Task and acceptance criteria:
-- Code reviewed / output observed:
-- Skills demonstrated:
-- Decisions and assumptions:
-- Gaps or blockers:
+## Validation status
+
+| Area | Current evidence |
+|---|---|
+| Notebook source | Reconstructed from reviewed exercises; not an export of the live workspace |
+| Python syntax | Checked for the current introductory notebook |
+| Databricks runtime | No independently recorded clean-session run |
+| Windows/macOS browser path | Same remote notebook workflow documented; no OS-specific runtime code required |
+| Local Windows/macOS execution | Not packaged or validated |
+| Automated tests | Not yet provided |
+| Production infrastructure | Not implemented |
+
+For a future runtime validation, record the date, workspace/compute type without secrets, runtime or environment version where available, commit SHA, commands/cells run, and observed outputs. Keep expected results separate from observed evidence.
+
+## Track your own progress
+
+Copy this template into your fork's notes or a learning journal:
+
+```markdown
+### Session YYYY-MM-DD
+- Module/checkpoint:
+- Repository commit:
+- Environment:
+- Exercise attempted:
+- Result observed:
+- What I can explain independently:
+- Edge case or failure investigated:
+- Remaining questions:
 - Next task:
+```
+
+Finish a milestone when you can explain the concept, implement the behavior, verify the output, and diagnose a relevant failure. Do not equate reading a solution with demonstrating the skill.
+
+## Maintainer backlog
+
+Immediate:
+- [ ] Complete and review the daily-report exercise.
+- [ ] Record a clean-session Databricks run against a specific commit.
+- [ ] Expand module introductions and add explicit learning objectives.
+- [ ] Separate learner exercises from worked solutions as the course grows.
+
+Next:
+- [ ] Define an event contract, including event_id, account_id, user_id, event time, ingestion time, and allowed event types.
+- [ ] Add file-based fixtures and malformed-record cases.
+- [ ] Introduce Delta persistence and justify each processing layer.
+- [ ] Add meaningful correctness checks before scheduling or deployment.
+- [ ] Provide Windows and macOS instructions for future local tooling, with version requirements and validation evidence.
+- [ ] Distinguish free-environment exercises from paid or architecture-only extensions.
+
+## Milestone history
+
+| Date | Material added |
+|---|---|
+| 2026-10-10 | Initial environment exercises, Python/PySpark counts, filters, grouping and renaming |
+| 2026-10-16 | Left joins, null handling, zero-activity filtering and UTC timestamp parsing documented |
+| 2026-10-17 | Dates, daily aggregation, reporting calendar and account-date joins added; guides restructured as a public curriculum |
+
+History records material development, not completion by every learner.
