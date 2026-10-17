@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Account Pulse — Getting started
-# MAGIC Reconstructed from Erez's submitted exercises on 2026-10-10 and 2026-10-16.
+# MAGIC Reconstructed from Erez's submitted exercises on 2026-10-10, 2026-10-16, and 2026-10-17.
 # MAGIC This is not a live-workspace export. Names and formatting are normalized.
 # MAGIC Expected outputs are documented; this reconstruction has not been run in Databricks by the assistant.
 
@@ -160,9 +160,59 @@ display(parsed_events_df)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Next task — date extraction (pending)
-# MAGIC Add event_date to parsed_events_df using withColumn, F.to_date, and F.col.
-# MAGIC Assign the result to daily_events_df and preserve event_ts.
-# MAGIC Acceptance: five rows, event_ts remains timestamp, event_date is date,
-# MAGIC no null dates for this fixture, three events on 2026-10-14 and two on 2026-10-15.
-# MAGIC No solution is included until the exercise is submitted.
+# MAGIC ## Daily activity — submitted 2026-10-17
+# MAGIC Code reviewed; runtime output has not been independently observed.
+
+# COMMAND ----------
+
+daily_event_df = parsed_events_df.withColumn(
+    "event_date", F.to_date(F.col("event_ts"))
+)
+display(daily_event_df)
+
+# COMMAND ----------
+
+# Grain: one row per account and UTC date with recorded activity.
+count_daily_event_df = (
+    daily_event_df
+    .groupBy("account_id", "event_date")
+    .count()
+    .withColumnRenamed("count", "daily_events")
+)
+display(count_daily_event_df)
+
+# COMMAND ----------
+
+# Explicit calendar independent of received events.
+# Exercise assumption: all three accounts are eligible on both reporting dates.
+reporting_dates_df = (
+    spark.createDataFrame(
+        [("2026-10-14",), ("2026-10-15",)],
+        ["event_date"]
+    )
+    .withColumn("event_date", F.to_date(F.col("event_date")))
+)
+
+account_dates_df = accounts_df.crossJoin(reporting_dates_df)
+display(account_dates_df)
+
+# COMMAND ----------
+
+# Match the account-date grain on both keys; preserve all six combinations.
+daily_acc_activity = account_dates_df.join(
+    count_daily_event_df,
+    on=["account_id", "event_date"],
+    how="left"
+)
+display(daily_acc_activity)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Next task — finish the daily report (pending)
+# MAGIC Assuming the synthetic reporting periods are complete:
+# MAGIC 1. Replace nulls only in daily_events with zero.
+# MAGIC 2. Sort by account_id, then event_date.
+# MAGIC 3. Assign to daily_account_report and display it.
+# MAGIC Expected: six rows, two zero counts for Cedar, and counts summing to five.
+# MAGIC The solution has not yet been submitted and is intentionally omitted.
