@@ -23,11 +23,11 @@ Learning priorities:
 
 ## Current status
 
-Reviewed exercises now cover Python counts, Spark DataFrame creation, filtering, aggregation, renaming, filtering aggregated results, left joins, scoped null replacement, zero-activity filtering, and UTC timestamp parsing.
+Reviewed exercises now cover Python counts, Spark DataFrame creation, filtering, aggregation, renaming, left joins, scoped null replacement, zero-activity filtering, UTC timestamp parsing, date extraction, daily aggregation, an independent reporting calendar, and an account-date cross join followed by a two-key left join.
 
-Latest checkpoint: **2026-10-16**. Submitted code has been reviewed; displayed outputs have not been independently observed. We also documented the danger of interpreting a failed truncate-first refresh as zero activity.
+Latest checkpoint: **2026-10-17**. Submitted code has been reviewed; displayed outputs have not been independently observed. The daily join is expected to preserve six account-date rows, including null counts for Cedar on both reporting dates.
 
-**Next:** add an `event_date` column to `parsed_events_df` while preserving `event_ts`. Date extraction is assigned but not yet submitted.
+**Next:** replace nulls only in `daily_events` under the complete-synthetic-data assumption, sort by account and date, and assign `daily_account_report`. This final daily-report step is pending.
 
 See [PROGRESS.md](PROGRESS.md) for evidence, expected results, and the next task.
 
