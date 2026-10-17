@@ -31,6 +31,12 @@ Latest checkpoint: **2026-10-16**. Submitted code has been reviewed; displayed o
 
 See [PROGRESS.md](PROGRESS.md) for evidence, expected results, and the next task.
 
+## Live Databricks notebook
+
+[Open the Account Pulse learning notebook in Databricks](https://dbc-d59ea919-4a47.cloud.databricks.com/editor/notebooks/273428319476598?o=1380376101535698)
+
+Requires sign-in and permission to access the Databricks workspace and notebook. This link does not grant access or automatically synchronize the notebook with this repository. The live notebook's contents have not been independently inspected by the assistant.
+
 ## Repository contents
 
 | File | Purpose |
