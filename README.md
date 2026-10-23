@@ -88,6 +88,7 @@ Cloning is not required for the browser path. Do not run the notebook with plain
 | Material | What is available now |
 |---|---|
 | [00_getting_started.py](00_getting_started.py) | Worked examples for Python counts, DataFrames, filtering, grouping, renaming, joins, null handling, timestamps, dates, and a daily reporting calendar |
+| [01_commands_reference.py](01_commands_reference.py) | Self-contained annotated reference for commands introduced through account reconciliation: syntax, SQL comparisons, expected results, and common mistakes |
 | [PROGRESS.md](PROGRESS.md) | Curriculum delivery status, expected results, reusable learner checklist, and next exercise |
 | This README | Setup, prerequisites, curriculum, milestones, and reference links |
 
@@ -114,6 +115,8 @@ Study the modules in order. Later modules build on earlier outputs. The delivery
 Streaming and Kafka ingestion may become a later extension. The current event payloads are not connected to Kafka.
 
 ## How to study
+
+Keep [01_commands_reference.py](01_commands_reference.py) alongside the exercises when you need a command explained. It can be imported as a separate Databricks notebook and has its own fixtures. Reference examples do not imply that every exercise has been completed. Its Python syntax has been checked; a Databricks runtime run is not yet independently verified.
 
 For each topic:
 1. Read the concept and predict the output.
